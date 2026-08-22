@@ -148,8 +148,28 @@ const runTest = id => {
 
   console.error = error
 
+  if (
+    !Object.prototype.hasOwnProperty.call(caches, id) ||
+    typeof caches[id] !== 'function'
+  ) {
+    error(' unsupported cache id', id)
+    postMessage(
+      JSON.stringify({
+        name: id,
+        set: 0,
+        get1: 0,
+        update: 0,
+        get2: 0,
+        evict: 0,
+      })
+    )
+    process.exit(1)
+  }
+
+  const createCache = caches[id]
+
   while (++n < times) {
-    const lru = caches[id](num)
+    const lru = createCache(num)
     const stimer = precise().start()
     for (let i = 0; i < num; i++) lru.set(data1[i][0], data1[i][1])
     time.set.push(stimer.stop().diff() / x)
